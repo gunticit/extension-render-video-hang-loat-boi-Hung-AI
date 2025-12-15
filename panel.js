@@ -410,14 +410,36 @@ async function sendToContentScript(type, payload = {}) {
             }
         });
 
+        if (!response) {
+            throw new Error('Không nhận được phản hồi từ background script');
+        }
+
         if (!response.success) {
-            throw new Error(response.error);
+            throw new Error(response.error || 'Unknown error');
         }
 
         return response.response;
     } catch (error) {
         console.error('[Panel] Error sending to content script:', error);
-        throw error;
+
+        // Provide helpful error messages
+        let userMessage = error.message;
+
+        if (error.message.includes('Receiving end does not exist')) {
+            userMessage = '❌ Không thể kết nối với trang Flow.\n\n' +
+                '📋 Hướng dẫn khắc phục:\n' +
+                '1. Mở trang Google Labs Flow (https://labs.google/fx/tools/flow)\n' +
+                '2. Nhấn F5 để refresh trang\n' +
+                '3. Đợi trang load hoàn toàn\n' +
+                '4. Thử lại';
+        } else if (error.message.includes('Extension context invalidated')) {
+            userMessage = '❌ Extension đã được cập nhật.\n\n' +
+                'Vui lòng đóng panel này và mở lại.';
+        }
+
+        const enhancedError = new Error(userMessage);
+        enhancedError.originalError = error;
+        throw enhancedError;
     }
 }
 

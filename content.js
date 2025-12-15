@@ -408,7 +408,52 @@ function getAllPromptsStatus(uuidList) {
     return results;
 }
 
-// 10. Count Active Rendering Slots
+// 10. Get Video URLs for a prompt
+function getVideoUrls(uuid) {
+    const parentDiv = findPromptParentDiv(uuid);
+    if (!parentDiv) {
+        return { success: false, videos: [] };
+    }
+
+    const videoUrls = [];
+
+    // Find video tags
+    const videoTags = parentDiv.querySelectorAll('video');
+    videoTags.forEach(video => {
+        if (video.src && video.src.startsWith('blob:')) {
+            videoUrls.push({
+                type: 'video',
+                url: video.src,
+                poster: video.poster || null
+            });
+        }
+    });
+
+    // Find img tags (thumbnails)
+    const imgTags = parentDiv.querySelectorAll('img[src*="blob"]');
+    imgTags.forEach(img => {
+        if (img.src && img.src.startsWith('blob:')) {
+            // Check if not already added as poster
+            const exists = videoUrls.some(v => v.poster === img.src);
+            if (!exists) {
+                videoUrls.push({
+                    type: 'image',
+                    url: img.src
+                });
+            }
+        }
+    });
+
+    console.log('[Content] Found videos for UUID:', uuid, videoUrls.length);
+
+    return {
+        success: true,
+        videos: videoUrls,
+        count: videoUrls.length
+    };
+}
+
+// 11. Count Active Rendering Slots
 function countActiveRenderingSlots() {
     const container = document.querySelector('.sc-c884da2c-6');
     if (!container) return 0;
@@ -482,9 +527,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                     sendResponse({ success: true, activeSlots: slotsCount });
                     break;
 
+                case 'GET_VIDEOS':
+                    const videosResult = getVideoUrls(message.payload.uuid);
+                    sendResponse(videosResult);
+                    break;
+
                 case 'GENERATE_UUID':
                     const uuid = generateUUID();
                     sendResponse({ success: true, uuid: uuid });
+                    break;
+
+                case 'PING':
+                    sendResponse({ success: true, message: 'Content script is ready' });
                     break;
 
                 default:
