@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flow Video Automation</title>
+  <link rel="stylesheet" href="panel.css">
+</head>
+<body>
+  <div class="panel-container">
+    <!-- Header -->
+    <header class="panel-header">
+      <h1>🎬 Flow Video Automation</h1>
+      <p class="subtitle">Tạo video hàng loạt tự động</p>
+    </header>
+
+    <!-- Upload Section -->
+    <section class="upload-section">
+      <div class="upload-box">
+        <label for="file-upload" class="upload-label">
+          📁 Tải file prompts (.txt)
+        </label>
+        <input type="file" id="file-upload" accept=".txt" style="display: none;">
+        <div class="file-info" id="file-info">Chưa có file nào được chọn</div>
+      </div>
+    </section>
+
+    <!-- Settings Section -->
+    <section class="settings-section">
+      <h2>⚙️ Cài đặt</h2>
+      <div class="settings-grid">
+        <!-- Model -->
+        <div class="setting-item">
+          <label for="model-select">Mô hình:</label>
+          <select id="model-select">
+            <option value="veo-3.1-fast">Veo 3.1 - Fast</option>
+            <option value="veo-3.1-fast-lower">Veo 3.1 - Fast [Lower Priority]</option>
+            <option value="veo-3.1">Veo 3.1</option>
+            <option value="veo-3.1-lower">Veo 3.1 [Lower Priority]</option>
+          </select>
+        </div>
+
+        <!-- Aspect Ratio -->
+        <div class="setting-item">
+          <label for="aspect-select">Tỷ lệ:</label>
+          <select id="aspect-select">
+            <option value="16:9">Ngang (16:9)</option>
+            <option value="9:16">Dọc (9:16)</option>
+          </select>
+        </div>
+
+        <!-- Video Count -->
+        <div class="setting-item">
+          <label for="count-select">Số lượng video:</label>
+          <select id="count-select">
+            <option value="1">1 video</option>
+            <option value="2">2 video</option>
+            <option value="3">3 video</option>
+            <option value="4" selected>4 video</option>
+          </select>
+        </div>
+
+        <!-- Pacing -->
+        <div class="setting-item">
+          <label for="pacing-input">Pacing (%):</label>
+          <input type="number" id="pacing-input" min="0" max="100" value="10" step="5">
+          <span class="tooltip">?
+            <span class="tooltiptext">% hoàn thành prompt trước để kích hoạt prompt sau</span>
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Control Buttons -->
+    <section class="control-section">
+      <button id="start-btn" class="btn btn-primary" disabled>
+        ▶️ Tạo video hàng loạt
+      </button>
+      <button id="pause-btn" class="btn btn-secondary" disabled>
+        ⏸️ Tạm dừng
+      </button>
+      <button id="stop-btn" class="btn btn-danger" disabled>
+        ⏹️ Dừng
+      </button>
+    </section>
+
+    <!-- Status Bar -->
+    <section class="status-bar">
+      <div class="status-text" id="status-text">
+        ⏳ Chờ tải prompts...
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+    </section>
+
+    <!-- Prompts Table -->
+    <section class="prompts-section">
+      <h2>📝 Danh sách Prompts</h2>
+      <div class="table-container">
+        <table id="prompts-table">
+          <thead>
+            <tr>
+              <th style="width: 50px;">STT</th>
+              <th style="width: 200px;">Prompt</th>
+              <th style="width: 80px;">% Tiến độ</th>
+              <th style="width: 150px;">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="prompts-tbody">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <!-- Modal for Full Prompt View/Edit -->
+  <div id="prompt-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>✏️ Chỉnh sửa Prompt</h2>
+        <span class="close-modal">&times;</span>
+      </div>
+      <div class="modal-body">
+        <textarea id="modal-prompt-text" rows="8"></textarea>
+        <input type="hidden" id="modal-prompt-index">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" id="save-prompt-btn">💾 Lưu</button>
+        <button class="btn btn-secondary close-modal">❌ Hủy</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for Video Preview -->
+  <div id="video-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>🎥 Xem Video</h2>
+        <span class="close-video-modal">&times;</span>
+      </div>
+      <div class="modal-body">
+        <div id="video-preview-container">
+          <!-- Video thumbnails will be displayed here -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary close-video-modal">Đóng</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="panel.js"></script>
+</body>
+</html>
